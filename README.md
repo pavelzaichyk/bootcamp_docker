@@ -169,16 +169,3 @@ jobs:
       - name: Push Docker image
         run: docker push ${{ secrets.DOCKER_USERNAME }}/spring-boot-app:latest
 ```
-
-### 4.3. Test Automated Deployment
-
-Commit and push the changes to trigger the GitHub Actions workflow:
-```bash
-git add .
-git commit -m "Added Docker CI/CD workflow"
-git push origin main
-```
-
-Go to your GitHub repository → `Actions` tab to check the workflow execution.
-
-Once completed, your updated Docker image will be available in Docker Hub.

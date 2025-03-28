@@ -1,0 +1,53 @@
+services:
+  nginx:
+    image: nginx
+    deploy:
+      replicas: 5  # Run 5 instances of nginx
+    ports:
+      - "8081-8085:80"
+    environment:
+      USERNAME: ${USERNAME}
+      NGINX_ENVSUBST_TEMPLATE_DIR: /usr/share/nginx/templates
+      NGINX_ENVSUBST_OUTPUT_DIR: /usr/share/nginx/html
+    volumes:
+      - ./nginx:/usr/share/nginx/templates
+    networks:
+      - app-network
+
+  database:
+    image: mysql:8
+    container_name: mysql-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./database/init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - app-network
+
+  spring-app:
+    image: pavelzaichyk/spring-boot-app:latest
+    container_name: spring-app
+    depends_on:
+      - database
+    ports:
+      - "8080:8080"
+    environment:
+      - DEVOPS=${DEVOPS}
+      - SPRING_DATASOURCE_URL=jdbc:mysql://database:3306/${DB_NAME}
+      - SPRING_DATASOURCE_USERNAME=${DB_USER}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+    networks:
+      - app-network
+
+networks:
+  app-network:
+
+volumes:
+  mysql-data:
