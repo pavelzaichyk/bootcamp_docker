@@ -1,29 +1,31 @@
 #!/bin/bash
 
 # Update system packages
-sudo apt update && sudo apt upgrade -y
+sudo dnf update -y
 
-# Install required dependencies
-sudo apt install -y apt-transport-https ca-certificates curl software-properties-common
+# Install Git
+sudo dnf install -y git
 
-# Add Docker GPG key
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+# Install Docker
+sudo dnf install -y docker
 
-# Add Docker repository
-echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-# Update package list and install Docker
-sudo apt update
-sudo apt install -y docker-ce docker-ce-cli containerd.io
+# Install Docker Compose
+sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
 
 # Start and enable Docker service
 sudo systemctl start docker
 sudo systemctl enable docker
 
+# Fix Docker socket permissions
+sudo chmod 666 /var/run/docker.sock
+
 # Add current user to the Docker group (avoids using sudo for Docker commands)
 sudo usermod -aG docker $USER
 
-# Display installed Docker version
+# Display installed versions
+git --version
 docker --version
+docker compose version
 
-echo "Docker installation completed successfully! Please restart your terminal or run 'newgrp docker' to apply the changes."
+echo "Docker, Docker Compose and Git installation completed successfully! Please restart your terminal or run 'newgrp docker' to apply the changes."
